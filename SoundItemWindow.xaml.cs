@@ -39,6 +39,7 @@ namespace ShackSoundboard
                 sliderVolume.Value = EditedSoundItem.Volume.Linear;
                 singleFadeInTime.Value = EditedSoundItem.FadeInTime;
                 singleFadeOutTime.Value = EditedSoundItem.FadeOutTime;
+                checkBoxIgnoreAutoPlaylist.IsChecked = EditedSoundItem.IgnoreFromAutoPlaylist;
             }
         }
 
@@ -120,6 +121,14 @@ namespace ShackSoundboard
         private void buttonCancel_Click(object sender, RoutedEventArgs e)
         {
             DialogResult = false;
+        }
+
+        private void checkBoxIgnoreAutoPlaylist_Checked(object sender, RoutedEventArgs e)
+        {
+            if (EditedSoundItem != null)
+            {
+                EditedSoundItem.IgnoreFromAutoPlaylist = checkBoxIgnoreAutoPlaylist.IsChecked.Value;
+            }
         }
     }
 }

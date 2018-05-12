@@ -125,7 +125,7 @@ namespace ShackSoundboard
                 int visited = 0;
                 while (visited < _loadedItems.Count)
                 {
-                    if (_loadedItems[index] != music && _loadedItems[index].SoundType == SoundType.Music)
+                    if (_loadedItems[index] != music && _loadedItems[index].SoundType == SoundType.Music && !_loadedItems[index].IgnoreFromAutoPlaylist)
                     {
                         SoundManager.Instance.Play(_loadedItems[index]);
                         break;

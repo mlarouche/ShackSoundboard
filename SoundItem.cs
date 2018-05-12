@@ -81,6 +81,8 @@ namespace ShackSoundboard
             }
         }
 
+        public bool IgnoreFromAutoPlaylist { get; set; }
+
         [JsonIgnore]
         public bool IsPlaying
         {
@@ -132,6 +134,7 @@ namespace ShackSoundboard
             FadeOutTime = item.FadeOutTime;
             DisplayName = item.DisplayName;
             ImagePath = item.ImagePath;
+            IgnoreFromAutoPlaylist = item.IgnoreFromAutoPlaylist;
         }
 
         public void Update()
