@@ -53,6 +53,8 @@ namespace ShackSoundboard
         private List<SoundInstance> _activeInstances = new List<SoundInstance>();
         private List<FadeRequest> _fadeRequests = new List<FadeRequest>();
 
+        public event Action<SoundItem> MusicEnded;
+
         public static SoundManager Instance
         {
             get
@@ -318,6 +320,11 @@ namespace ShackSoundboard
                 {
                     _currentMusic.Resume();
                 }
+            }
+
+            if (instance.Type == SoundType.Music)
+            {
+                MusicEnded?.Invoke(instance.Item);
             }
 
             _activeInstances.Remove(instance);

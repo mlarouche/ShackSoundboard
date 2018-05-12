@@ -82,6 +82,7 @@ namespace ShackSoundboard
         private void Window_Loaded(object sender, RoutedEventArgs e)
         {
             SoundManager.Instance.Init();
+            SoundManager.Instance.MusicEnded += SoundManager_MusicEnded;
 
             var regKey = Registry.CurrentUser.CreateSubKey(RegKey);
             if (regKey != null)
@@ -94,6 +95,24 @@ namespace ShackSoundboard
             }
 
             buttonList.ItemsSource = _loadedItems;
+        }
+
+        private void SoundManager_MusicEnded(SoundItem music)
+        {
+            var index = _loadedItems.IndexOf(music);
+
+            int visited = 0;
+            while (visited < _loadedItems.Count)
+            {
+                if (_loadedItems[index] != music && _loadedItems[index].SoundType == SoundType.Music)
+                {
+                    SoundManager.Instance.Play(_loadedItems[index]);
+                    break;
+                }
+
+                index = (index + 1) % _loadedItems.Count;
+                ++visited;
+            }
         }
 
         private void Window_Closing(object sender, CancelEventArgs e)

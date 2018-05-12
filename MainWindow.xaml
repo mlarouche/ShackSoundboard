@@ -32,7 +32,6 @@
             </MenuItem>
             <MenuItem Header="Help" />
         </Menu>
-
         <StackPanel Grid.Row="1" Orientation="Horizontal">
             <Slider x:Name="sliderMainVolume" Width="250" Value="1.0" Minimum="0.0" Maximum="1.0" TickFrequency="0.05" TickPlacement="Both"  ValueChanged="sliderMainVolume_ValueChanged" />
             <Label x:Name="labelMainVolume" Content="0 dB" />
@@ -47,11 +46,6 @@
                     <WrapPanel Orientation="Horizontal"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
-            <ItemsControl.ContextMenu>
-                <ContextMenu>
-                    <MenuItem Header="Add" />
-                </ContextMenu>
-            </ItemsControl.ContextMenu>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
                     <Button Click="Button_Click" Margin="3,3,3,3" FontSize="32" MinWidth="150" MinHeight="150"  MaxWidth="150" MaxHeight="150" Background="{Binding SoundType, Converter={StaticResource soundTypeConverter}}">
