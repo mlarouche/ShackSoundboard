@@ -5,8 +5,30 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShackSoundboard"
         mc:Ignorable="d"
-        Title="MainWindow" Height="350" Width="525">
+        Title="Shack à Cassettes Sound Board" Height="350" Width="525" Loaded="Window_Loaded">
     <Grid>
-        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="22" />
+            <RowDefinition Height="28" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Menu Grid.Row="0">
+            <MenuItem Header="File">
+                <MenuItem Command="ApplicationCommands.Save" />
+            </MenuItem>
+            <MenuItem Header="Help" />
+        </Menu>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal">
+            <Slider x:Name="sliderMainVolume" Width="250" Value="1.0" Minimum="0.0" Maximum="1.0" TickFrequency="0.05" TickPlacement="Both"  ValueChanged="sliderMainVolume_ValueChanged" />
+            <Label x:Name="labelMainVolume" Content="0 dB" />
+            <Button x:Name="buttonStop" Content="■" Click="buttonStop_Click" Height="20" />
+        </StackPanel>
+        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Top">
+            <Button x:Name="buttonMusic" Content="Music" Click="buttonMusic1_Click" Height="24" />
+            <Button x:Name="buttonMusic2" Content="Music 2" Click="buttonMusic2_Click" Height="24" Margin="10,0,0,0"/>
+            <Button x:Name="buttonJingle" Content="Jingle" Click="buttonJingle_Click" Height="24" Margin="10,0,0,0"/>
+            <Button x:Name="buttonSFX" Content="SFX" Click="buttonSFX_Click" Height="24" Margin="10,0,0,0" />
+        </StackPanel>
     </Grid>
 </Window>
