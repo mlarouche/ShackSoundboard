@@ -2,23 +2,18 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Globalization;
+using System.IO;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
-using System.Globalization;
-using System.IO;
+using System.Windows.Threading;
 
 namespace ShackSoundboard
 {
@@ -54,6 +49,9 @@ namespace ShackSoundboard
 
         private ObservableCollection<SoundItem> _loadedItems = new ObservableCollection<SoundItem>();
         private string _lastOpenedPath = string.Empty;
+        private DispatcherTimer _timer = new DispatcherTimer();
+
+        private ObservableCollection<SoundItem> _queuedItems = new ObservableCollection<SoundItem>();
 
         private JsonSerializer _serializer;
         private JsonSerializer Serializer
@@ -94,24 +92,48 @@ namespace ShackSoundboard
                 }
             }
 
+            _timer.Interval = TimeSpan.FromSeconds(1);
+            _timer.Tick += _timer_Tick;
+            _timer.Start();
+
+            listBoxQueue.ItemsSource = _queuedItems;
             buttonList.ItemsSource = _loadedItems;
+        }
+
+        private void _timer_Tick(object sender, EventArgs e)
+        {
+            foreach(var item in _loadedItems)
+            {
+                item.Update();
+            }
         }
 
         private void SoundManager_MusicEnded(SoundItem music)
         {
-            var index = _loadedItems.IndexOf(music);
-
-            int visited = 0;
-            while (visited < _loadedItems.Count)
+            if (_queuedItems.Count > 0)
             {
-                if (_loadedItems[index] != music && _loadedItems[index].SoundType == SoundType.Music)
-                {
-                    SoundManager.Instance.Play(_loadedItems[index]);
-                    break;
-                }
+                SoundItem itemToPlay = _queuedItems[0];
 
-                index = (index + 1) % _loadedItems.Count;
-                ++visited;
+                SoundManager.Instance.Play(itemToPlay);
+
+                _queuedItems.RemoveAt(0);
+            }
+            else
+            {
+                var index = _loadedItems.IndexOf(music);
+
+                int visited = 0;
+                while (visited < _loadedItems.Count)
+                {
+                    if (_loadedItems[index] != music && _loadedItems[index].SoundType == SoundType.Music)
+                    {
+                        SoundManager.Instance.Play(_loadedItems[index]);
+                        break;
+                    }
+
+                    index = (index + 1) % _loadedItems.Count;
+                    ++visited;
+                }
             }
         }
 
@@ -259,25 +281,34 @@ namespace ShackSoundboard
                 {
                     bool isCtrlDown = Keyboard.IsKeyDown(Key.LeftCtrl);
 
-                    if (!isCtrlDown && selectedItem.SoundType == SoundType.Music 
-                        && SoundManager.Instance.CurrentMusic?.Item == selectedItem
-                        && SoundManager.Instance.IsPlaying(selectedItem))
+                    bool isShiftDown = Keyboard.IsKeyDown(Key.LeftShift);
+
+                    if (isShiftDown)
                     {
-                        SoundManager.Instance.Toggle(selectedItem);
+                        SoundManager.Instance.Stop(selectedItem, true);
                     }
                     else
                     {
-                        bool forceStop = false;
-
-                        if (selectedItem.SoundType == SoundType.Music)
+                        if (!isCtrlDown && selectedItem.SoundType == SoundType.Music
+                            && SoundManager.Instance.CurrentMusic?.Item == selectedItem
+                            && SoundManager.Instance.IsPlaying(selectedItem))
                         {
-                            if (SoundManager.Instance.CurrentMusic?.Item == selectedItem)
-                            {
-                                forceStop = true;
-                            }
+                            SoundManager.Instance.Toggle(selectedItem);
                         }
+                        else
+                        {
+                            bool forceStop = false;
 
-                        SoundManager.Instance.Play(selectedItem, forceStop);
+                            if (selectedItem.SoundType == SoundType.Music)
+                            {
+                                if (SoundManager.Instance.CurrentMusic?.Item == selectedItem)
+                                {
+                                    forceStop = true;
+                                }
+                            }
+
+                            SoundManager.Instance.Play(selectedItem, forceStop);
+                        }
                     }
                 }
             }
@@ -299,6 +330,19 @@ namespace ShackSoundboard
         private void menuItemFileExit_Click(object sender, RoutedEventArgs e)
         {
             App.Current.Shutdown();
+        }
+
+        private void Button_Queue(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                SoundItem selectedItem = menuItem.DataContext as SoundItem;
+                if (selectedItem != null && selectedItem.SoundType == SoundType.Music)
+                {
+                    _queuedItems.Add(selectedItem);
+                }
+            }
         }
 
         private void Button_Edit(object sender, RoutedEventArgs e)
@@ -332,6 +376,19 @@ namespace ShackSoundboard
                 if (selectedItem != null)
                 {
                     _loadedItems.Remove(selectedItem);
+                }
+            }
+        }
+
+        private void Queue_Remove(object sender, RoutedEventArgs e)
+        {
+            MenuItem menuItem = sender as MenuItem;
+            if (menuItem != null)
+            {
+                SoundItem selectedItem = menuItem.DataContext as SoundItem;
+                if (selectedItem != null)
+                {
+                    _queuedItems.Remove(selectedItem);
                 }
             }
         }

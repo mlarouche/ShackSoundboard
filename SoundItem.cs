@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 
@@ -80,6 +81,38 @@ namespace ShackSoundboard
             }
         }
 
+        [JsonIgnore]
+        public bool IsPlaying
+        {
+            get
+            {
+                if (SoundType != SoundType.SFX)
+                {
+                    return SoundManager.Instance.IsPlaying(this);
+                }
+
+                return false;
+            }
+        }
+
+        [JsonIgnore]
+        public TimeSpan CurrentPosition
+        {
+            get
+            {
+                return SoundManager.Instance.CurrentPosition(this);
+            }
+        }
+
+        [JsonIgnore]
+        public TimeSpan Duration
+        {
+            get
+            {
+                return SoundManager.Instance.Duration(this);
+            }
+        }
+
         public SoundInstance CreateSoundInstance()
         {
             return new SoundInstance(this);
@@ -99,6 +132,13 @@ namespace ShackSoundboard
             FadeOutTime = item.FadeOutTime;
             DisplayName = item.DisplayName;
             ImagePath = item.ImagePath;
+        }
+
+        public void Update()
+        {
+            notifyPropertyChanged(nameof(IsPlaying));
+            notifyPropertyChanged(nameof(CurrentPosition));
+            notifyPropertyChanged(nameof(Duration));
         }
 
         private void notifyPropertyChanged([CallerMemberName]string propertyName = "")

@@ -8,6 +8,7 @@
         Title="Shack à Cassettes Sound Board" Height="350" Width="525" Loaded="Window_Loaded" Closing="Window_Closing">
     <Window.Resources>
         <local:SoundTypeToColorConverter x:Key="soundTypeConverter" />
+        <BooleanToVisibilityConverter x:Key="boolConverter" />
     </Window.Resources>
     <Window.CommandBindings>
         <CommandBinding Command="ApplicationCommands.New" Executed="New_Executed" />
@@ -40,31 +41,76 @@
             <Label Content="Playlist Management:" />
             <Button x:Name="buttonAdd" Content="+"  Height="20" Margin="1,0,0,0" Click="buttonAdd_Click" />
         </StackPanel>
-        <ItemsControl x:Name="buttonList" Grid.Row="2">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <WrapPanel Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <Button Click="Button_Click" Margin="3,3,3,3" FontSize="32" MinWidth="150" MinHeight="150"  MaxWidth="150" MaxHeight="150" Background="{Binding SoundType, Converter={StaticResource soundTypeConverter}}">
-                        <Button.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Header="Edit" Click="Button_Edit"/>
-                                <Separator />
-                                <MenuItem Header="Remove" Click="Button_Remove" />
-                            </ContextMenu>
-                        </Button.ContextMenu>
-                        <Button.Content>
-                            <StackPanel Orientation="Vertical">
-                                <Image Source="{Binding ImagePath}" Width="96" Height="96" VerticalAlignment="Center" HorizontalAlignment="Center" />
-                                <TextBlock FontSize="20" Text="{Binding DisplayName}" TextWrapping="Wrap" />
-                            </StackPanel>
-                        </Button.Content>
-                    </Button>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="4" />
+                <ColumnDefinition Width="100" />
+            </Grid.ColumnDefinitions>
+            <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl x:Name="buttonList" Grid.Column="0">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Button Click="Button_Click" Margin="3,3,3,3" MinWidth="150" MinHeight="150"  MaxWidth="150" MaxHeight="150" Background="{Binding SoundType, Converter={StaticResource soundTypeConverter}}">
+                                <Button.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="Queue" Click="Button_Queue" />
+                                        <Separator />
+                                        <MenuItem Header="Edit" Click="Button_Edit"/>
+                                        <MenuItem Header="Remove" Click="Button_Remove" />
+                                    </ContextMenu>
+                                </Button.ContextMenu>
+                                <Button.Content>
+                                    <StackPanel Orientation="Vertical">
+                                        <Image Source="{Binding ImagePath}" Width="96" Height="96" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Visibility="{Binding IsPlaying, Converter={StaticResource boolConverter}}">
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:hh}:{1:mm}:{2:ss}">
+                                                        <Binding Path="CurrentPosition" />
+                                                        <Binding Path="CurrentPosition" />
+                                                        <Binding Path="CurrentPosition" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                            <TextBlock Text=" / " />
+                                            <TextBlock>
+                                                <TextBlock.Text>
+                                                    <MultiBinding StringFormat="{}{0:hh}:{1:mm}:{2:ss}">
+                                                        <Binding Path="Duration" />
+                                                        <Binding Path="Duration" />
+                                                        <Binding Path="Duration" />
+                                                    </MultiBinding>
+                                                </TextBlock.Text>
+                                            </TextBlock>
+                                        </StackPanel>
+                                        <TextBlock FontSize="20" Text="{Binding DisplayName}" VerticalAlignment="Center" TextWrapping="Wrap" />
+                                    </StackPanel>
+                                </Button.Content>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            <GridSplitter Grid.Column="1" HorizontalAlignment="Stretch" />
+            <ListBox x:Name="listBoxQueue" Grid.Column="2">
+                <ListBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DisplayName}" FontSize="20">
+                            <TextBlock.ContextMenu>
+                                <ContextMenu>
+                                    <MenuItem Header="Remove" Click="Queue_Remove" />
+                                </ContextMenu>
+                            </TextBlock.ContextMenu>
+                        </TextBlock>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </Grid>
     </Grid>
 </Window>

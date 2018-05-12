@@ -111,6 +111,35 @@ namespace ShackSoundboard
             return false;
         }
 
+        public TimeSpan CurrentPosition(SoundItem item)
+        {
+            foreach (var instance in _activeInstances)
+            {
+                if (instance.Item == item)
+                {
+                    return instance.Player.Position;
+                }
+            }
+
+            return TimeSpan.Zero;
+        }
+
+        public TimeSpan Duration(SoundItem item)
+        {
+            foreach (var instance in _activeInstances)
+            {
+                if (instance.Item == item)
+                {
+                    if (instance.Player.NaturalDuration.HasTimeSpan)
+                    {
+                        return instance.Player.NaturalDuration.TimeSpan;
+                    }
+                }
+            }
+
+            return TimeSpan.Zero;
+        }
+
         public void Play(SoundItem item, bool forceStop = false)
         {
             var instance = item.CreateSoundInstance();
@@ -133,22 +162,7 @@ namespace ShackSoundboard
                     {
                         if (_currentMusic != null)
                         {
-                            if (!forceStop && _currentMusic.Item.FadeOutTime > 0f)
-                            {
-                                createStopFadeOutRequest(_currentMusic);
-                            }
-                            else
-                            {
-                                _currentMusic.Stop();
-
-                                for (int i = _activeInstances.Count - 1; i >= 0; --i)
-                                {
-                                    if (_activeInstances[i].Item == item)
-                                    {
-                                        _activeInstances.RemoveAt(i);
-                                    }
-                                }
-                            }
+                            Stop(_currentMusic);
                         }
 
                         if (item.FadeInTime > 0f)
@@ -198,11 +212,69 @@ namespace ShackSoundboard
             _activeInstances.Add(instance);
         }
 
-        public void Toggle(SoundItem selectedItem)
+        public void Stop(SoundItem item, bool forceStop)
+        {
+            var copy = new List<SoundInstance>(_activeInstances);
+
+            foreach(var instance in copy)
+            {
+                if (instance.Item == item)
+                {
+                    Stop(instance);
+                }
+            }
+        }
+
+        public void Stop(SoundInstance instance, bool forceStop = false)
+        {
+            switch (instance.Type)
+            {
+                case SoundType.SFX:
+                    {
+                        instance.Stop();
+                        _activeInstances.Remove(instance);
+                        break;
+                    }
+                case SoundType.Music:
+                    {
+                        if (_currentMusic != null)
+                        {
+                            if (!forceStop && _currentMusic.Item.FadeOutTime > 0f)
+                            {
+                                createStopFadeOutRequest(_currentMusic);
+                            }
+                            else
+                            {
+                                _currentMusic.Stop();
+
+                                _activeInstances.Remove(instance);
+                            }
+                        }
+
+                        break;
+                    }
+                case SoundType.Jingle:
+                    {
+                        if (!forceStop && instance.Item.FadeOutTime > 0f)
+                        {
+                            createStopFadeOutRequest(instance);
+                        }
+                        else
+                        {
+                            instance.Stop();
+
+                            _activeInstances.Remove(instance);
+                        }
+                        break;
+                    }
+            }
+        }
+
+        public void Toggle(SoundItem item)
         {
             foreach(var instance in _activeInstances)
             {
-                if (instance.Item == selectedItem)
+                if (instance.Item == item)
                 {
                     if (instance.IsPaused)
                     {
