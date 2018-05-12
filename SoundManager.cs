@@ -1,15 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Concurrent;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading;
-using System.Threading.Tasks;
 
 namespace ShackSoundboard
 {
-    class FadeRequest
+    public class FadeRequest
     {
         private float _timer = 0f;
 
@@ -44,7 +40,7 @@ namespace ShackSoundboard
         }
     }
 
-    class SoundManager
+    public class SoundManager
     {
         private static readonly SoundManager _instance = new SoundManager();
 
@@ -77,6 +73,14 @@ namespace ShackSoundboard
             }
         }
 
+        public SoundInstance CurrentMusic
+        {
+            get
+            {
+                return _currentMusic;
+            }
+        }
+
         private SoundManager()
         {
         }
@@ -92,7 +96,20 @@ namespace ShackSoundboard
             _updateThread.Start();
         }
 
-        public void Play(SoundItem item)
+        public bool IsPlaying(SoundItem item)
+        {
+            foreach(var instance in _activeInstances)
+            {
+                if (instance.Item == item)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public void Play(SoundItem item, bool forceStop = false)
         {
             var instance = item.CreateSoundInstance();
             instance.OnCompleted += onInstanceCompleted;
@@ -114,7 +131,7 @@ namespace ShackSoundboard
                     {
                         if (_currentMusic != null)
                         {
-                            if (_currentMusic.Item.FadeOutTime > 0f)
+                            if (!forceStop && _currentMusic.Item.FadeOutTime > 0f)
                             {
                                 createStopFadeOutRequest(_currentMusic);
                             }
@@ -177,6 +194,24 @@ namespace ShackSoundboard
             }
 
             _activeInstances.Add(instance);
+        }
+
+        public void Toggle(SoundItem selectedItem)
+        {
+            foreach(var instance in _activeInstances)
+            {
+                if (instance.Item == selectedItem)
+                {
+                    if (instance.IsPaused)
+                    {
+                        instance.Resume();
+                    }
+                    else
+                    {
+                        instance.Pause();
+                    }
+                }
+            }
         }
 
         public void UpdateThread()

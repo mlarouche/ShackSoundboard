@@ -1,13 +1,9 @@
 ﻿using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace ShackSoundboard
 {
-    struct SoundVolume
+    public struct SoundVolume
     {
         public float Linear { get; set; }
 

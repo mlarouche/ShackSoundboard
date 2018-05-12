@@ -3,9 +3,10 @@ using System.Windows.Media;
 
 namespace ShackSoundboard
 {
-    class SoundInstance
+    public class SoundInstance
     {
         private SoundItem _item;
+        private bool _isPaused = false;
         private MediaPlayer _player = new MediaPlayer();
         private SoundVolume _instanceVolume = new SoundVolume();
 
@@ -37,9 +38,18 @@ namespace ShackSoundboard
             {
                 _instanceVolume = value;
 
-                App.Current.Dispatcher.Invoke(() => {
+                App.Current?.Dispatcher.Invoke(() =>
+                {
                     _player.Volume = value.Linear;
                 });
+            }
+        }
+
+        public bool IsPaused
+        {
+            get
+            {
+                return _isPaused;
             }
         }
 
@@ -75,11 +85,13 @@ namespace ShackSoundboard
 
         public void Resume()
         {
+            _isPaused = false;
             _player.Play();
         }
 
         public void Pause()
         {
+            _isPaused = true;
             _player.Pause();
         }
     }

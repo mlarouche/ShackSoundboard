@@ -5,7 +5,16 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ShackSoundboard"
         mc:Ignorable="d"
-        Title="Shack à Cassettes Sound Board" Height="350" Width="525" Loaded="Window_Loaded">
+        Title="Shack à Cassettes Sound Board" Height="350" Width="525" Loaded="Window_Loaded" Closing="Window_Closing">
+    <Window.Resources>
+        <local:SoundTypeToColorConverter x:Key="soundTypeConverter" />
+    </Window.Resources>
+    <Window.CommandBindings>
+        <CommandBinding Command="ApplicationCommands.New" Executed="New_Executed" />
+        <CommandBinding Command="ApplicationCommands.Open" Executed="Open_Executed" />
+        <CommandBinding Command="ApplicationCommands.Save" Executed="Save_Executed" />
+        <CommandBinding Command="ApplicationCommands.SaveAs" Executed="SaveAs_Executed" />
+    </Window.CommandBindings>
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="22" />
@@ -14,7 +23,12 @@
         </Grid.RowDefinitions>
         <Menu Grid.Row="0">
             <MenuItem Header="File">
+                <MenuItem Command="ApplicationCommands.New" />
+                <MenuItem Command="ApplicationCommands.Open" />
                 <MenuItem Command="ApplicationCommands.Save" />
+                <MenuItem Command="ApplicationCommands.SaveAs" />
+                <Separator />
+                <MenuItem Header="Exit" x:Name="menuItemFileExit" Click="menuItemFileExit_Click" />
             </MenuItem>
             <MenuItem Header="Help" />
         </Menu>
@@ -23,12 +37,40 @@
             <Slider x:Name="sliderMainVolume" Width="250" Value="1.0" Minimum="0.0" Maximum="1.0" TickFrequency="0.05" TickPlacement="Both"  ValueChanged="sliderMainVolume_ValueChanged" />
             <Label x:Name="labelMainVolume" Content="0 dB" />
             <Button x:Name="buttonStop" Content="■" Click="buttonStop_Click" Height="20" />
+            <Separator/>
+            <Label Content="Playlist Management:" />
+            <Button x:Name="buttonAdd" Content="+"  Height="20" Margin="1,0,0,0" Click="buttonAdd_Click" />
         </StackPanel>
-        <StackPanel Grid.Row="2" Orientation="Horizontal" VerticalAlignment="Top">
-            <Button x:Name="buttonMusic" Content="Music" Click="buttonMusic1_Click" Height="24" />
-            <Button x:Name="buttonMusic2" Content="Music 2" Click="buttonMusic2_Click" Height="24" Margin="10,0,0,0"/>
-            <Button x:Name="buttonJingle" Content="Jingle" Click="buttonJingle_Click" Height="24" Margin="10,0,0,0"/>
-            <Button x:Name="buttonSFX" Content="SFX" Click="buttonSFX_Click" Height="24" Margin="10,0,0,0" />
-        </StackPanel>
+        <ItemsControl x:Name="buttonList" Grid.Row="2">
+            <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ItemsControl.ItemsPanel>
+            <ItemsControl.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Add" />
+                </ContextMenu>
+            </ItemsControl.ContextMenu>
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Click="Button_Click" Margin="3,3,3,3" FontSize="32" MinWidth="150" MinHeight="150"  MaxWidth="150" MaxHeight="150" Background="{Binding SoundType, Converter={StaticResource soundTypeConverter}}">
+                        <Button.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="Edit" Click="Button_Edit"/>
+                                <Separator />
+                                <MenuItem Header="Remove" Click="Button_Remove" />
+                            </ContextMenu>
+                        </Button.ContextMenu>
+                        <Button.Content>
+                            <StackPanel Orientation="Vertical">
+                                <Image Source="{Binding ImagePath}" Width="96" Height="96" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                                <TextBlock FontSize="20" Text="{Binding DisplayName}" TextWrapping="Wrap" />
+                            </StackPanel>
+                        </Button.Content>
+                    </Button>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
     </Grid>
 </Window>
